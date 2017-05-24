@@ -1,0 +1,12 @@
+{
+    "name": "davahome/database",
+    "license": "gpl",
+    "require": {
+        "ext-pdo": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "DavaHome\\Database\\": "src/DavaHome/Database/"
+        }
+    }
+}
