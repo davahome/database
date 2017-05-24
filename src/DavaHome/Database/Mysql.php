@@ -37,7 +37,7 @@ class Mysql extends Pdo
     /**
      * @inheritDoc
      */
-    public function prepare($statement, array $driver_options = [])
+    public function prepare($statement, $driver_options = [])
     {
         $hash = $this->calculateStatementHash($statement, $driver_options);
         if (isset($this->stmtCache[$hash])) {
@@ -62,5 +62,73 @@ class Mysql extends Pdo
         $stmt->execute($inputParameters);
 
         return $stmt;
+    }
+
+    /**
+     * @param string $query
+     * @param array  $values
+     * @param array  $where
+     *
+     * @return \PDOStatement
+     */
+    protected function buildQuery($query, array $values, array $where = null)
+    {
+        $i = 0;
+        $queryData = [];
+
+        // Create SET statement
+        $columns = [];
+        foreach ($values as $field => $value) {
+            $key = 'value_' . $i++;
+            $columns[] = sprintf('`%s` = :%s', $field, $key);
+            $queryData[$key] = $value;
+        }
+        $query .= ' SET ' . implode(', ', $columns);
+
+        // Create WHERE statement
+        if ($where !== null) {
+            $columns = [];
+            foreach ($where as $field => $value) {
+                $key = 'where_' . $i++;
+                $columns[] = sprintf('`%s` = :%s', $field, $key);
+                $queryData[$key] = $value;
+            }
+            $query .= ' WHERE ' . implode(' AND ', $columns);
+        }
+
+        return $this->execute($query, $queryData);
+    }
+
+    /**
+     * Update a row
+     *
+     * @param string $table
+     * @param array  $values key=>value
+     * @param array  $where  key=>value where condition (will be combined using AND)
+     * @param bool   $allowEmptyWhere
+     *
+     * @return \PDOStatement
+     * @throws \Exception
+     */
+    public function update($table, array $values, array $where, $allowEmptyWhere = false)
+    {
+        if (!$allowEmptyWhere && empty($where)) {
+            throw new \Exception('Empty where statements are not allowed!');
+        }
+
+        return $this->buildQuery(sprintf('UPDATE `%s`', $table), $values, $where);
+    }
+
+    /**
+     * Insert a new row
+     *
+     * @param string $table
+     * @param array  $values key=>value
+     *
+     * @return \PDOStatement
+     */
+    public function insert($table, array $values)
+    {
+        return $this->buildQuery(sprintf('INSERT INTO `%s`', $table), $values);
     }
 }
