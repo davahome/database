@@ -79,9 +79,13 @@ class Mysql extends Pdo
         // Create SET statement
         $columns = [];
         foreach ($values as $field => $value) {
-            $key = 'value_' . $i++;
-            $columns[] = sprintf('`%s` = :%s', $field, $key);
-            $queryData[$key] = $value;
+            if ($value instanceof DirectValue) {
+                $columns[] = sprintf('`%s` = %s', $field, $value->getValue());
+            } else {
+                $key = 'value_' . $i++;
+                $columns[] = sprintf('`%s` = :%s', $field, $key);
+                $queryData[$key] = $value;
+            }
         }
         $query .= ' SET ' . implode(', ', $columns);
 
@@ -89,9 +93,13 @@ class Mysql extends Pdo
         if ($where !== null) {
             $columns = [];
             foreach ($where as $field => $value) {
-                $key = 'where_' . $i++;
-                $columns[] = sprintf('`%s` = :%s', $field, $key);
-                $queryData[$key] = $value;
+                if ($value instanceof DirectValue) {
+                    $columns[] = sprintf('`%s` = %s', $field, $value->getValue());
+                } else {
+                    $key = 'where_' . $i++;
+                    $columns[] = sprintf('`%s` = :%s', $field, $key);
+                    $queryData[$key] = $value;
+                }
             }
             $query .= ' WHERE ' . implode(' AND ', $columns);
         }
