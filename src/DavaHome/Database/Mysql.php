@@ -12,11 +12,10 @@ class Mysql extends Pdo
      */
     public static function create($driver, $host, $user, $password, $database, $options = [])
     {
-        $options = array_merge([
-            static::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "UTF8"',
-        ], $options);
+        $db = parent::create($driver, $host, $user, $password, $database, $options);
+        $db->exec('SET NAMES "UTF8"');
 
-        return parent::create($driver, $host, $user, $password, $database, $options);
+        return $db;
     }
 
     /**
