@@ -70,23 +70,25 @@ class Mysql extends Pdo
      *
      * @return \PDOStatement
      */
-    protected function buildQuery($query, array $values, array $where = null)
+    protected function buildQuery($query, array $values = null, array $where = null)
     {
         $i = 0;
         $queryData = [];
 
         // Create SET statement
-        $columns = [];
-        foreach ($values as $field => $value) {
-            if ($value instanceof DirectValue) {
-                $columns[] = sprintf('`%s` = %s', $field, $value->getValue());
-            } else {
-                $key = 'value_' . $i++;
-                $columns[] = sprintf('`%s` = :%s', $field, $key);
-                $queryData[$key] = $value;
+        if ($values !== null) {
+            $columns = [];
+            foreach ($values as $field => $value) {
+                if ($value instanceof DirectValue) {
+                    $columns[] = sprintf('`%s` = %s', $field, $value->getValue());
+                } else {
+                    $key = 'value_' . $i++;
+                    $columns[] = sprintf('`%s` = :%s', $field, $key);
+                    $queryData[$key] = $value;
+                }
             }
+            $query .= ' SET ' . implode(', ', $columns);
         }
-        $query .= ' SET ' . implode(', ', $columns);
 
         // Create WHERE statement
         if ($where !== null) {
@@ -137,5 +139,37 @@ class Mysql extends Pdo
     public function insert($table, array $values)
     {
         return $this->buildQuery(sprintf('INSERT INTO `%s`', $table), $values);
+    }
+
+    /**
+     * Select from database
+     *
+     * @param string $table
+     * @param array  $where
+     *
+     * @return \PDOStatement
+     */
+    public function select($table, array $where)
+    {
+        return $this->buildQuery(sprintf('SELECT * FROM `%s`', $table), null, $where);
+    }
+
+    /**
+     * Delete a from database
+     *
+     * @param string $table
+     * @param array  $where
+     * @param bool   $allowEmptyWhere
+     *
+     * @return \PDOStatement
+     * @throws \Exception
+     */
+    public function delete($table, array $where, $allowEmptyWhere = false)
+    {
+        if (!$allowEmptyWhere && empty($where)) {
+            throw new \Exception('Empty where statements are not allowed!');
+        }
+
+        return $this->buildQuery(sprintf('DELETE FROM `%s`', $table), null, $where);
     }
 }
