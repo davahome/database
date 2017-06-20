@@ -172,4 +172,17 @@ class Mysql extends Pdo
 
         return $this->buildQuery(sprintf('DELETE FROM `%s`', $table), null, $where);
     }
+
+    /**
+     * Let the database create a UUID
+     *
+     * @return string
+     */
+    public function createUuid()
+    {
+        $stmt = $this->execute('SELECT UUID()');
+        list($uuid) = $stmt->fetch(Mysql::FETCH_NUM);
+
+        return $uuid;
+    }
 }
