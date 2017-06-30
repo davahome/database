@@ -79,11 +79,17 @@ class Mysql extends Pdo
         if ($values !== null) {
             $columns = [];
             foreach ($values as $field => $value) {
+                $operator = '=';
+                if ($value instanceof CustomOperator) {
+                    $operator = $value->getOperator();
+                    $value = $value->getValue();
+                }
+
                 if ($value instanceof DirectValue) {
-                    $columns[] = sprintf('`%s` = %s', $field, $value->getValue());
+                    $columns[] = sprintf('`%s` %s %s', $field, $operator, $value->getValue());
                 } else {
                     $key = 'value_' . $i++;
-                    $columns[] = sprintf('`%s` = :%s', $field, $key);
+                    $columns[] = sprintf('`%s` %s :%s', $field, $operator, $key);
                     $queryData[$key] = $value;
                 }
             }
@@ -94,11 +100,17 @@ class Mysql extends Pdo
         if ($where !== null) {
             $columns = [];
             foreach ($where as $field => $value) {
+                $operator = '=';
+                if ($value instanceof CustomOperator) {
+                    $operator = $value->getOperator();
+                    $value = $value->getValue();
+                }
+
                 if ($value instanceof DirectValue) {
-                    $columns[] = sprintf('`%s` = %s', $field, $value->getValue());
+                    $columns[] = sprintf('`%s` %s %s', $field, $operator, $value->getValue());
                 } else {
                     $key = 'where_' . $i++;
-                    $columns[] = sprintf('`%s` = :%s', $field, $key);
+                    $columns[] = sprintf('`%s` %s :%s', $field, $operator, $key);
                     $queryData[$key] = $value;
                 }
             }
