@@ -20,7 +20,7 @@ class Pdo extends \PDO
     {
         $dsn = sprintf('%s:dbname=%s;host=%s', $driver, $database, $host);
 
-        $options = array_merge([
+        $options = array_replace([
             static::ATTR_PERSISTENT => false,
             static::ATTR_TIMEOUT    => 60,
             static::ATTR_ERRMODE    => static::ERRMODE_EXCEPTION,
