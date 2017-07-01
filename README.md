@@ -2,9 +2,9 @@
 
 [![Build Status](https://travis-ci.org/DavaHome/database.svg?branch=master)](https://travis-ci.org/DavaHome/database)
 
-davahome/database is a small php library which provides a very simple PDO based MySQL wrapper. Its main functionality is to provide some handy functionality to a basic PDO object.
+davahome/database is a small php library which provides a very simple PDO based MySQL wrapper. Its main functionality is to provide some additional functionality to the basic PDO object.
 
-The DavaHome\Database\MySQL class is directly derived from PDO and provides all of its methods. There are some additional features like:
+The `DavaHome\Database\MySQL` class is directly derived from PDO and provides all of its methods. There are some additional features like:
 
 - **PDO Statement Cache** (Reuse of PDO statements if the query hasn't changed)
 - **[Basic operations as methods](#basic-operation-methods)** (Like select, delete, and more)
@@ -104,7 +104,7 @@ Delete existing rows from the database. The where statement is identical to the 
 
 ```php
 /**
- * Delete a from database
+ * Delete from database
  *
  * @param string $table
  * @param array  $where
@@ -151,12 +151,13 @@ public function execute($statement, array $inputParameters = [], array $driverOp
 
 ## Advanced queries
 
-To provide a more advanced functionality for the basic operation methods there are additional objects to provide more functionality.
+To provide a more advanced functionality for the basic operation methods there are additional classes.
 
 
 #### DirectValue
 
 The DirectValue class allows to use MySQL functions or a increment-queries through the basic operation methods.
+All arguments given to the DirectValue class will be passed 1-2-1 into the query. There will be no escaping for those values!
 
 ```php
 use Davahome\Database\DirectValue;
@@ -171,7 +172,7 @@ $db->update('table', ['count' => new DirectValue('`count` + 1')], ['id' => 1]);
 
 #### CustomOperator
 
-The CustomOperator class allows to override the default `=` operator. You can combine the CustomOperator with the DirectValue class.
+The CustomOperator class allows to override the default operator used by all basic operation methods (`=`). You can also combine the CustomOperator with the DirectValue class.
 
 ```php
 use Davahome\Database\CustomOperator;
@@ -179,6 +180,6 @@ use Davahome\Database\CustomOperator;
 // The query will look like this: SELECT * FROM `table` WHERE `count` >= 2
 $db->select('table', ['count' => new CustomOperator('>=', 2)]);
 
-// The query will look like this: SELECT * FROM `table` WHERE `last_updated` >= NOW()
-$db->select('table', ['last_updated' => new CustomOperator('>=', new DirectValue('NOW()'))]);
+// The query will look like this: SELECT * FROM `table` WHERE `last_updated` <= NOW()
+$db->select('table', ['last_updated' => new CustomOperator('<=', new DirectValue('NOW()'))]);
 ```
