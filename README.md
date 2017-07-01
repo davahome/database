@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/DavaHome/database.svg?branch=master)](https://travis-ci.org/DavaHome/database)
 
-The davahome/database is a small php library which provides a very simple PDO based MySQL wrapper. Its main functionality is to provide some handy functionality to a basic PDO object.
+davahome/database is a small php library which provides a very simple PDO based MySQL wrapper. Its main functionality is to provide some handy functionality to a basic PDO object.
 
 The DavaHome\Database\MySQL class is directly derived from PDO and provides all of its methods. There are some additional features like:
 
