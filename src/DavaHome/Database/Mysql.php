@@ -97,7 +97,7 @@ class Mysql extends Pdo
         }
 
         // Create WHERE statement
-        if ($where !== null) {
+        if (!empty($where)) {
             $columns = [];
             foreach ($where as $field => $value) {
                 $operator = '=';
