@@ -9,6 +9,12 @@ The `DavaHome\Database\MySQL` class is directly derived from PDO and provides al
 - **PDO Statement Cache** (Reuse of PDO statements if the query hasn't changed)
 - **[Basic operations as methods](#basic-operation-methods)** (Like select, delete, and more)
 
+# Installation
+
+```bash
+php composer.phar require davahome/database
+```
+
 
 ## Example
 
