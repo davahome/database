@@ -24,7 +24,7 @@ use DavaHome\Database\Mysql;
 $db = Mysql::create(
     Mysql::DRIVER_MYSQL,
     'localhost',
-    'root,
+    'root',
     '',
     'database',
     [
