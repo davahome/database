@@ -4,6 +4,11 @@ namespace DavaHome\Database;
 
 class Mysql extends Pdo
 {
+    const ISOLATION_LEVEL_READ_UNCOMITTED = 'READ UNCOMMITED';
+    const ISOLATION_LEVEL_READ_COMMITTED = 'READ COMMITTED';
+    const ISOLATION_LEVEL_REPEATABLE_READ = 'REPEATABLE READ';
+    const ISOLATION_LEVEL_SERIALIZABLE = 'SERIALIZABLE';
+
     /** @var array|\PDOStatement[] */
     protected $stmtCache = [];
 
@@ -64,6 +69,27 @@ class Mysql extends Pdo
     }
 
     /**
+     * Set the isolation level
+     *
+     * @param string $isolationLevel
+     *
+     * @return bool
+     */
+    public function setIsolationLevel($isolationLevel)
+    {
+        if (!in_array($isolationLevel, [
+            self::ISOLATION_LEVEL_READ_UNCOMITTED,
+            self::ISOLATION_LEVEL_READ_COMMITTED,
+            self::ISOLATION_LEVEL_REPEATABLE_READ,
+            self::ISOLATION_LEVEL_SERIALIZABLE
+        ])) {
+            return false;
+        }
+
+        return $this->exec('SET TRANSACTION ISOLATION LEVEL '.$isolationLevel) !== false;
+    }
+
+    /**
      * @param string $query
      * @param array  $values
      * @param array  $where
@@ -87,13 +113,14 @@ class Mysql extends Pdo
 
                 if ($value instanceof DirectValue) {
                     $columns[] = sprintf('`%s` %s %s', $field, $operator, $value->getValue());
-                } else {
-                    $key = 'value_' . $i++;
+                }
+                else {
+                    $key = 'value_'.$i++;
                     $columns[] = sprintf('`%s` %s :%s', $field, $operator, $key);
                     $queryData[$key] = $value;
                 }
             }
-            $query .= ' SET ' . implode(', ', $columns);
+            $query .= ' SET '.implode(', ', $columns);
         }
 
         // Create WHERE statement
@@ -108,13 +135,14 @@ class Mysql extends Pdo
 
                 if ($value instanceof DirectValue) {
                     $columns[] = sprintf('`%s` %s %s', $field, $operator, $value->getValue());
-                } else {
-                    $key = 'where_' . $i++;
+                }
+                else {
+                    $key = 'where_'.$i++;
                     $columns[] = sprintf('`%s` %s :%s', $field, $operator, $key);
                     $queryData[$key] = $value;
                 }
             }
-            $query .= ' WHERE ' . implode(' AND ', $columns);
+            $query .= ' WHERE '.implode(' AND ', $columns);
         }
 
         return $this->execute($query, $queryData);
