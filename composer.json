@@ -1,6 +1,6 @@
 {
     "name": "davahome/database",
-    "license": "gpl",
+    "license": "GPL-3.0-or-later",
     "require": {
         "php": ">=5.5",
         "ext-pdo": "*"
