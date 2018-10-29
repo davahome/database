@@ -9,6 +9,8 @@ use DavaHome\Database\Mysql;
 class MysqlTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @param int $count
+     *
      * @return \PHPUnit_Framework_MockObject_MockObject|Mysql
      */
     protected function getMysqlMock_Execute($count = 1)

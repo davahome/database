@@ -2,18 +2,8 @@
 
 namespace DavaHome\Database;
 
-use DavaHome\Database\Traits\SqlDatabaseTrait;
-
-/**
- * @method \PDOStatement update($table, array $values, array $where, $allowEmptyWhere = false)
- * @method \PDOStatement insert($table, array $values)
- * @method \PDOStatement select($table, array $where)
- * @method \PDOStatement delete($table, array $where, $allowEmptyWhere = false)
- */
 class Mysql extends Pdo implements DatabaseInterface
 {
-    use SqlDatabaseTrait;
-
     const ISOLATION_LEVEL_READ_UNCOMITTED = 'READ UNCOMMITED';
     const ISOLATION_LEVEL_READ_COMMITTED = 'READ COMMITTED';
     const ISOLATION_LEVEL_REPEATABLE_READ = 'REPEATABLE READ';
@@ -168,5 +158,70 @@ class Mysql extends Pdo implements DatabaseInterface
         list($uuid) = $stmt->fetch(Mysql::FETCH_NUM);
 
         return $uuid;
+    }
+
+    /**
+     * Update a row
+     *
+     * @param string $table
+     * @param array  $values key=>value
+     * @param array  $where  key=>value where condition (will be combined using AND)
+     * @param bool   $allowEmptyWhere
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function update($table, array $values, array $where, $allowEmptyWhere = false)
+    {
+        if (!$allowEmptyWhere && empty($where)) {
+            throw new \Exception('Empty where statements are not allowed!');
+        }
+
+        return $this->buildQuery(sprintf('UPDATE `%s`', $table), $values, $where);
+    }
+
+    /**
+     * Insert a new row
+     *
+     * @param string $table
+     * @param array  $values key=>value
+     *
+     * @return mixed
+     */
+    public function insert($table, array $values)
+    {
+        return $this->buildQuery(sprintf('INSERT INTO `%s`', $table), $values);
+    }
+
+    /**
+     * Select from database
+     *
+     * @param string $table
+     * @param array  $where
+     *
+     * @return mixed
+     */
+    public function select($table, array $where)
+    {
+        return $this->buildQuery(sprintf('SELECT * FROM `%s`', $table), null, $where);
+    }
+
+    /**
+     * Delete a from database
+     *
+     * @param string $table
+     * @param array  $where
+     * @param bool   $allowEmptyWhere
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function delete($table, array $where, $allowEmptyWhere = false)
+    {
+        if (!$allowEmptyWhere && empty($where)) {
+            throw new \Exception('Empty where statements are not allowed!');
+        }
+
+        return $this->buildQuery(sprintf('DELETE FROM `%s`', $table), null, $where);
     }
 }
