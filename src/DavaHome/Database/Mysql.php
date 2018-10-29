@@ -29,6 +29,7 @@ class Mysql extends Pdo implements DatabaseInterface
     {
         $db = parent::create($driver, $host, $user, $password, $database, $options);
         $db->exec('SET NAMES "UTF8"');
+        $db->exec('SET CHARACTER SET utf8');
 
         return $db;
     }
