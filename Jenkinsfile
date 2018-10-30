@@ -1,4 +1,4 @@
-node {
+node (label: 'php') {
     checkout scm
     stage('Build') {
         sh 'bash bin/composer.sh'
