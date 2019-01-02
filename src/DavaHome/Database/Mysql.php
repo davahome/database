@@ -168,7 +168,7 @@ class Mysql extends Pdo implements DatabaseInterface
      * @param array  $where  key=>value where condition (will be combined using AND)
      * @param bool   $allowEmptyWhere
      *
-     * @return mixed
+     * @return \PDOStatement
      * @throws \Exception
      */
     public function update($table, array $values, array $where, $allowEmptyWhere = false)
@@ -186,7 +186,7 @@ class Mysql extends Pdo implements DatabaseInterface
      * @param string $table
      * @param array  $values key=>value
      *
-     * @return mixed
+     * @return \PDOStatement
      */
     public function insert($table, array $values)
     {
@@ -199,7 +199,7 @@ class Mysql extends Pdo implements DatabaseInterface
      * @param string $table
      * @param array  $where
      *
-     * @return mixed
+     * @return \PDOStatement
      */
     public function select($table, array $where)
     {
@@ -213,7 +213,7 @@ class Mysql extends Pdo implements DatabaseInterface
      * @param array  $where
      * @param bool   $allowEmptyWhere
      *
-     * @return mixed
+     * @return \PDOStatement
      * @throws \Exception
      */
     public function delete($table, array $where, $allowEmptyWhere = false)
