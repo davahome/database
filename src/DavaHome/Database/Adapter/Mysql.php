@@ -1,36 +1,34 @@
 <?php
+declare(strict_types=1);
 
-namespace DavaHome\Database;
+namespace DavaHome\Database\Adapter;
+
+use DavaHome\Database\DatabaseException;
+use DavaHome\Database\DatabaseInterface;
+use DavaHome\Database\Extension\CustomOperator;
+use DavaHome\Database\Extension\DirectValue;
+use PDOStatement;
 
 class Mysql extends Pdo implements DatabaseInterface
 {
-    const ISOLATION_LEVEL_READ_UNCOMITTED = 'READ UNCOMMITED';
-    const ISOLATION_LEVEL_READ_COMMITTED = 'READ COMMITTED';
-    const ISOLATION_LEVEL_REPEATABLE_READ = 'REPEATABLE READ';
-    const ISOLATION_LEVEL_SERIALIZABLE = 'SERIALIZABLE';
+    public const ISOLATION_LEVEL_READ_UNCOMITTED = 'READ UNCOMMITED';
+    public const ISOLATION_LEVEL_READ_COMMITTED = 'READ COMMITTED';
+    public const ISOLATION_LEVEL_REPEATABLE_READ = 'REPEATABLE READ';
+    public const ISOLATION_LEVEL_SERIALIZABLE = 'SERIALIZABLE';
 
-    /** @var array|\PDOStatement[] */
-    protected $stmtCache = [];
+    /** @var array<PDOStatement> */
+    protected array $stmtCache = [];
 
-    /**
-     * @inheritDoc
-     */
-    public static function create($driver, $host, $user, $password, $database, $options = [])
+    public static function create(string $driver, string $host, string $user, string $password, string $database, array $options = []): self
     {
         $db = parent::create($driver, $host, $user, $password, $database, $options);
-        $db->exec('SET NAMES "UTF8"');
-        $db->exec('SET CHARACTER SET utf8');
+        $db->exec('SET NAMES "utf8mb4"');
+        $db->exec('SET CHARACTER SET utf8mb4');
 
         return $db;
     }
 
-    /**
-     * @param string $statement
-     * @param string $driverOptions
-     *
-     * @return string
-     */
-    protected function calculateStatementHash($statement, $driverOptions)
+    protected function calculateStatementHash(string $statement, $driverOptions): string
     {
         if (is_array($driverOptions)) {
             ksort($driverOptions);
@@ -39,9 +37,6 @@ class Mysql extends Pdo implements DatabaseInterface
         return md5(json_encode([$statement, $driverOptions]));
     }
 
-    /**
-     * @inheritDoc
-     */
     public function prepare($statement, $driver_options = [])
     {
         $hash = $this->calculateStatementHash($statement, $driver_options);
@@ -54,14 +49,8 @@ class Mysql extends Pdo implements DatabaseInterface
 
     /**
      * Create and execute a prepared statement immediately
-     *
-     * @param string $statement
-     * @param array  $inputParameters
-     * @param array  $driverOptions
-     *
-     * @return mixed|\PDOStatement
      */
-    public function execute($statement, array $inputParameters = [], array $driverOptions = [])
+    public function execute(string $statement, array $inputParameters = [], array $driverOptions = []): PDOStatement
     {
         $stmt = $this->prepare($statement, $driverOptions);
         $stmt->execute($inputParameters);
@@ -71,33 +60,22 @@ class Mysql extends Pdo implements DatabaseInterface
 
     /**
      * Set the isolation level
-     *
-     * @param string $isolationLevel
-     *
-     * @return bool
      */
-    public function setIsolationLevel($isolationLevel)
+    public function setIsolationLevel(string $isolationLevel): bool
     {
         if (!in_array($isolationLevel, [
             self::ISOLATION_LEVEL_READ_UNCOMITTED,
             self::ISOLATION_LEVEL_READ_COMMITTED,
             self::ISOLATION_LEVEL_REPEATABLE_READ,
-            self::ISOLATION_LEVEL_SERIALIZABLE
+            self::ISOLATION_LEVEL_SERIALIZABLE,
         ])) {
             return false;
         }
 
-        return $this->exec('SET TRANSACTION ISOLATION LEVEL '.$isolationLevel) !== false;
+        return $this->exec('SET TRANSACTION ISOLATION LEVEL ' . $isolationLevel) !== false;
     }
 
-    /**
-     * @param string $query
-     * @param array  $values
-     * @param array  $where
-     *
-     * @return \PDOStatement
-     */
-    protected function buildQuery($query, array $values = null, array $where = null)
+    protected function buildQuery(string $query, ?array $values = null, ?array $where = null): PDOStatement
     {
         $i = 0;
         $queryData = [];
@@ -115,12 +93,12 @@ class Mysql extends Pdo implements DatabaseInterface
                 if ($value instanceof DirectValue) {
                     $columns[] = sprintf('`%s` %s %s', $field, $operator, $value->getValue());
                 } else {
-                    $key = 'value_'.$i++;
+                    $key = 'value_' . $i++;
                     $columns[] = sprintf('`%s` %s :%s', $field, $operator, $key);
                     $queryData[$key] = $value;
                 }
             }
-            $query .= ' SET '.implode(', ', $columns);
+            $query .= ' SET ' . implode(', ', $columns);
         }
 
         // Create WHERE statement
@@ -136,12 +114,12 @@ class Mysql extends Pdo implements DatabaseInterface
                 if ($value instanceof DirectValue) {
                     $columns[] = sprintf('`%s` %s %s', $field, $operator, $value->getValue());
                 } else {
-                    $key = 'where_'.$i++;
+                    $key = 'where_' . $i++;
                     $columns[] = sprintf('`%s` %s :%s', $field, $operator, $key);
                     $queryData[$key] = $value;
                 }
             }
-            $query .= ' WHERE '.implode(' AND ', $columns);
+            $query .= ' WHERE ' . implode(' AND ', $columns);
         }
 
         return $this->execute($query, $queryData);
@@ -149,13 +127,11 @@ class Mysql extends Pdo implements DatabaseInterface
 
     /**
      * Let the database create a UUID
-     *
-     * @return string
      */
-    public function createUuid()
+    public function createUuid(): string
     {
         $stmt = $this->execute('SELECT UUID()');
-        list($uuid) = $stmt->fetch(Mysql::FETCH_NUM);
+        [$uuid] = $stmt->fetch(Mysql::FETCH_NUM);
 
         return $uuid;
     }
@@ -168,13 +144,13 @@ class Mysql extends Pdo implements DatabaseInterface
      * @param array  $where  key=>value where condition (will be combined using AND)
      * @param bool   $allowEmptyWhere
      *
-     * @return \PDOStatement
-     * @throws \Exception
+     * @return PDOStatement
+     * @throws DatabaseException
      */
-    public function update($table, array $values, array $where, $allowEmptyWhere = false)
+    public function update(string $table, array $values, array $where, bool $allowEmptyWhere = false): PDOStatement
     {
         if (!$allowEmptyWhere && empty($where)) {
-            throw new \Exception('Empty where statements are not allowed!');
+            throw new DatabaseException('Empty where statements are not allowed!');
         }
 
         return $this->buildQuery(sprintf('UPDATE `%s`', $table), $values, $where);
@@ -186,9 +162,9 @@ class Mysql extends Pdo implements DatabaseInterface
      * @param string $table
      * @param array  $values key=>value
      *
-     * @return \PDOStatement
+     * @return PDOStatement
      */
-    public function insert($table, array $values)
+    public function insert(string $table, array $values): PDOStatement
     {
         return $this->buildQuery(sprintf('INSERT INTO `%s`', $table), $values);
     }
@@ -199,9 +175,9 @@ class Mysql extends Pdo implements DatabaseInterface
      * @param string $table
      * @param array  $where
      *
-     * @return \PDOStatement
+     * @return PDOStatement
      */
-    public function select($table, array $where)
+    public function select(string $table, array $where): PDOStatement
     {
         return $this->buildQuery(sprintf('SELECT * FROM `%s`', $table), null, $where);
     }
@@ -213,13 +189,13 @@ class Mysql extends Pdo implements DatabaseInterface
      * @param array  $where
      * @param bool   $allowEmptyWhere
      *
-     * @return \PDOStatement
-     * @throws \Exception
+     * @return PDOStatement
+     * @throws DatabaseException
      */
-    public function delete($table, array $where, $allowEmptyWhere = false)
+    public function delete(string $table, array $where, bool $allowEmptyWhere = false): PDOStatement
     {
         if (!$allowEmptyWhere && empty($where)) {
-            throw new \Exception('Empty where statements are not allowed!');
+            throw new DatabaseException('Empty where statements are not allowed!');
         }
 
         return $this->buildQuery(sprintf('DELETE FROM `%s`', $table), null, $where);

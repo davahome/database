@@ -1,6 +1,11 @@
 <?php
+declare(strict_types=1);
 
-namespace DavaHome\Database;
+namespace DavaHome\Database\Adapter;
+
+use DavaHome\Database\DatabaseException;
+use DavaHome\Database\DatabaseInterface;
+use SQLite3Result;
 
 class Sqlite3 extends \SQLite3 implements DatabaseInterface
 {
@@ -8,9 +13,9 @@ class Sqlite3 extends \SQLite3 implements DatabaseInterface
      * @param string $query
      * @param array  $params
      *
-     * @return \SQLite3Result
+     * @return SQLite3Result
      */
-    public function execute($query, array $params = [])
+    public function execute(string $query, array $params = []): SQLite3Result
     {
         $stmt = $this->prepare($query);
         foreach ($params as $name => $value) {
@@ -26,16 +31,16 @@ class Sqlite3 extends \SQLite3 implements DatabaseInterface
      * @param array  $where
      * @param bool   $allowEmptyWhere
      *
-     * @return mixed|\SQLite3Result
-     * @throws \Exception
+     * @return mixed|SQLite3Result
+     * @throws DatabaseException
      */
-    public function update($table, array $values, array $where, $allowEmptyWhere = false)
+    public function update(string $table, array $values, array $where, bool $allowEmptyWhere = false): SQLite3Result
     {
         $v = 0;
         $params = [];
 
         if (!$allowEmptyWhere && empty($where)) {
-            throw new \Exception('Empty where statements are not allowed!');
+            throw new DatabaseException('Empty where statements are not allowed!');
         }
 
         // SET
@@ -62,18 +67,18 @@ class Sqlite3 extends \SQLite3 implements DatabaseInterface
         return $this->execute($query);
     }
 
-    public function insert($table, array $values)
+    public function insert(string $table, array $values)
     {
-        throw new \Exception(__METHOD__ . ' is not implemented yet');
+        throw new DatabaseException(__METHOD__ . ' is not implemented yet');
     }
 
-    public function select($table, array $where)
+    public function select(string $table, array $where)
     {
-        throw new \Exception(__METHOD__ . ' is not implemented yet');
+        throw new DatabaseException(__METHOD__ . ' is not implemented yet');
     }
 
-    public function delete($table, array $where, $allowEmptyWhere = false)
+    public function delete(string $table, array $where, bool $allowEmptyWhere = false)
     {
-        throw new \Exception(__METHOD__ . ' is not implemented yet');
+        throw new DatabaseException(__METHOD__ . ' is not implemented yet');
     }
 }

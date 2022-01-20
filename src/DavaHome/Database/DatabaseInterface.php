@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace DavaHome\Database;
+
+use Exception;
 
 interface DatabaseInterface
 {
@@ -13,9 +16,9 @@ interface DatabaseInterface
      * @param bool   $allowEmptyWhere
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    public function update($table, array $values, array $where, $allowEmptyWhere = false);
+    public function update(string $table, array $values, array $where, bool $allowEmptyWhere = false);
 
     /**
      * Insert a new row
@@ -25,7 +28,7 @@ interface DatabaseInterface
      *
      * @return mixed
      */
-    public function insert($table, array $values);
+    public function insert(string $table, array $values);
 
     /**
      * Select from database
@@ -35,7 +38,7 @@ interface DatabaseInterface
      *
      * @return mixed
      */
-    public function select($table, array $where);
+    public function select(string $table, array $where);
 
     /**
      * Delete a from database
@@ -45,7 +48,7 @@ interface DatabaseInterface
      * @param bool   $allowEmptyWhere
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    public function delete($table, array $where, $allowEmptyWhere = false);
+    public function delete(string $table, array $where, bool $allowEmptyWhere = false);
 }

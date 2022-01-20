@@ -1,11 +1,11 @@
 <?php
+declare(strict_types=1);
 
-namespace DavaHome\Database;
+namespace DavaHome\Database\Extension;
 
 class CustomOperator
 {
-    /** @var string */
-    protected $operator = '=';
+    protected string $operator = '=';
 
     /** @var mixed|DirectValue */
     protected $value;
@@ -14,28 +14,21 @@ class CustomOperator
      * @param string            $operator
      * @param DirectValue|mixed $value
      */
-    public function __construct($operator, $value)
+    public function __construct(string $operator, $value)
     {
         $this->operator = $operator;
         $this->value = $value;
     }
 
-    /**
-     * @return string
-     */
-    public function getOperator()
+    public function getOperator(): string
     {
         return $this->operator;
     }
 
-    /**
-     * @param string $operator
-     *
-     * @return $this
-     */
-    public function setOperator($operator)
+    public function setOperator(string $operator): self
     {
         $this->operator = $operator;
+
         return $this;
     }
 
@@ -52,9 +45,10 @@ class CustomOperator
      *
      * @return $this
      */
-    public function setValue($value)
+    public function setValue($value): self
     {
         $this->value = $value;
+
         return $this;
     }
 }

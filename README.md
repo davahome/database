@@ -102,7 +102,7 @@ public function delete($table, array $where, $allowEmptyWhere = false)
 ### Example
 
 ```php
-use DavaHome\Database\Mysql;
+use DavaHome\Database\Adapter\Mysql;
 
 $db = Mysql::create(
     Mysql::DRIVER_MYSQL,
@@ -192,7 +192,7 @@ The DirectValue class allows to use MySQL functions or a increment-queries throu
 All arguments given to the DirectValue class will be passed 1-2-1 into the query. There will be no escaping for those values!
 
 ```php
-use Davahome\Database\DirectValue;
+use DavaHome\Database\Extension\DirectValue;
 
 // The query will look like this: UPDATE `table` SET `last_updated` = NOW() WHERE `id` = 1
 $db->update('table', ['last_updated' => new DirectValue('NOW()')], ['id' => 1]);
@@ -207,7 +207,7 @@ $db->update('table', ['count' => new DirectValue('`count` + 1')], ['id' => 1]);
 The CustomOperator class allows to override the default operator used by all basic operation methods (`=`). You can also combine the CustomOperator with the DirectValue class.
 
 ```php
-use Davahome\Database\CustomOperator;
+use DavaHome\Database\Extension\CustomOperator;
 
 // The query will look like this: SELECT * FROM `table` WHERE `count` >= 2
 $db->select('table', ['count' => new CustomOperator('>=', 2)]);

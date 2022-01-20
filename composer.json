@@ -2,11 +2,11 @@
     "name": "davahome/database",
     "license": "GPL-3.0-or-later",
     "require": {
-        "php": ">=5.5",
-        "ext-pdo": "*"
+        "php": ">=7.4",
+        "ext-pdo": "*",
+        "ext-json": "*"
     },
     "require-dev": {
-        "php": ">=5.6",
         "phpunit/phpunit": "^5"
     },
     "autoload": {
