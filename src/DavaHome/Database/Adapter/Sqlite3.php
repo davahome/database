@@ -4,10 +4,9 @@ declare(strict_types=1);
 namespace DavaHome\Database\Adapter;
 
 use DavaHome\Database\DatabaseException;
-use DavaHome\Database\DatabaseInterface;
 use SQLite3Result;
 
-class Sqlite3 extends \SQLite3 implements DatabaseInterface
+class Sqlite3 extends \SQLite3 implements AdapterInterface
 {
     /**
      * @param string $query

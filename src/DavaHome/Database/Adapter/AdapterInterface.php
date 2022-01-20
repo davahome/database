@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace DavaHome\Database;
+namespace DavaHome\Database\Adapter;
 
 use Exception;
 
-interface DatabaseInterface
+interface AdapterInterface
 {
     /**
      * Update a row

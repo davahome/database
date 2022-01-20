@@ -4,12 +4,11 @@ declare(strict_types=1);
 namespace DavaHome\Database\Adapter;
 
 use DavaHome\Database\DatabaseException;
-use DavaHome\Database\DatabaseInterface;
 use DavaHome\Database\Extension\CustomOperator;
 use DavaHome\Database\Extension\DirectValue;
 use PDOStatement;
 
-class Mysql extends Pdo implements DatabaseInterface
+class Mysql extends Pdo implements AdapterInterface
 {
     public const ISOLATION_LEVEL_READ_UNCOMITTED = 'READ UNCOMMITED';
     public const ISOLATION_LEVEL_READ_COMMITTED = 'READ COMMITTED';

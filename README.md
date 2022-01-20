@@ -4,7 +4,7 @@
 
 davahome/database is a small php library which provides a very simple PDO based MySQL wrapper. Its main functionality is to provide some additional functionality to the basic PDO object.
 
-The `DavaHome\Database\MySQL` class is directly derived from PDO and provides all of its methods. There are some additional features like:
+The `DavaHome\Database\Adapter\MySQL` class is directly derived from PDO and provides all of its methods. There are some additional features like:
 
 - **PDO Statement Cache** (Reuse of PDO statements if the query hasn't changed)
 - **[Basic operations as methods](#basic-operation-methods)** (Like select, delete, and more)
@@ -20,7 +20,7 @@ php composer.phar require davahome/database
 
 # Basic Operation Methods
 
-These methods are forced by the `DavaHome\Database\DatabaseInterface` and are supported by all database handlers
+These methods are forced by the `DavaHome\Database\Adapter\AdapterInterface` and are supported by all database handlers
 
 ### select
 
@@ -35,7 +35,7 @@ Select rows from database. The where statement is an associative array with `tab
  *
  * @return mixed
  */
-public function select($table, array $where)
+public function select(string $table, array $where)
 ```
 
 
@@ -53,9 +53,9 @@ Update existing rows in the database. The values are an associative array, exact
  * @param bool   $allowEmptyWhere
  *
  * @return mixed
- * @throws \Exception
+ * @throws \DavaHome\Database\DatabaseException
  */
-public function update($table, array $values, array $where, $allowEmptyWhere = false)
+public function update(string $table, array $values, array $where, bool $allowEmptyWhere = false)
 ```
 
 
@@ -72,7 +72,7 @@ Insert a new row into the database. The values are an associative array, exactly
  *
  * @return mixed
  */
-public function insert($table, array $values)
+public function insert(string $table, array $values)
 ```
 
 
@@ -89,9 +89,9 @@ Delete existing rows from the database. The where statement is identical to the 
  * @param bool   $allowEmptyWhere
  *
  * @return mixed
- * @throws \Exception
+ * @throws \DavaHome\Database\DatabaseException
  */
-public function delete($table, array $where, $allowEmptyWhere = false)
+public function delete(string $table, array $where, bool $allowEmptyWhere = false)
 ```
 
 
@@ -142,7 +142,7 @@ This method creates a uuid which can be used as non-incremental unique index. Se
  *
  * @return string
  */
-public function createUuid()
+public function createUuid(): string
 ```
 
 
@@ -160,7 +160,7 @@ Creates a prepared statement which will be executed directly
  *
  * @return mixed|\PDOStatement
  */
-public function execute($statement, array $inputParameters = [], array $driverOptions = [])
+public function execute($statement, array $inputParameters = [], array $driverOptions = []):PDOStatement
 ```
 
 
@@ -176,7 +176,7 @@ Set the isolation level of transactions in the current connection
  *
  * @return bool
  */
-public function setIsolationLevel($isolationLevel)
+public function setIsolationLevel(string $isolationLevel): bool
 ```
  
 
