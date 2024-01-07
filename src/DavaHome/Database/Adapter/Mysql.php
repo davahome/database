@@ -89,11 +89,17 @@ class Mysql extends Pdo implements AdapterInterface
                     $value = $value->getValue();
                 }
 
+                if ($field instanceof DirectValue) {
+                    $field = $field->getValue();
+                } else {
+                    $field = sprintf('`%s`', $field);
+                }
+
                 if ($value instanceof DirectValue) {
-                    $columns[] = sprintf('`%s` %s %s', $field, $operator, $value->getValue());
+                    $columns[] = sprintf('%s %s %s', $field, $operator, $value->getValue());
                 } else {
                     $key = 'value_' . $i++;
-                    $columns[] = sprintf('`%s` %s :%s', $field, $operator, $key);
+                    $columns[] = sprintf('%s %s :%s', $field, $operator, $key);
                     $queryData[$key] = $value;
                 }
             }
