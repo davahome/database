@@ -1,6 +1,6 @@
 # davahome/database
 
-[![Build Status](https://travis-ci.org/DavaHome/database.svg?branch=master)](https://travis-ci.org/DavaHome/database)
+[![Tests](https://github.com/davahome/database/actions/workflows/tests.yml/badge.svg)](https://github.com/davahome/database/actions/workflows/tests.yml)
 
 davahome/database is a small php library which provides a very simple PDO based MySQL wrapper. Its main functionality is to provide some additional functionality to the basic PDO object.
 
@@ -35,7 +35,7 @@ Select rows from database. The where statement is an associative array with `tab
  *
  * @return mixed
  */
-public function select(string $table, array $where)
+public function select(string $table, array $where): mixed;
 ```
 
 
@@ -55,7 +55,7 @@ Update existing rows in the database. The values are an associative array, exact
  * @return mixed
  * @throws \DavaHome\Database\DatabaseException
  */
-public function update(string $table, array $values, array $where, bool $allowEmptyWhere = false)
+public function update(string $table, array $values, array $where, bool $allowEmptyWhere = false): mixed;
 ```
 
 
@@ -72,7 +72,7 @@ Insert a new row into the database. The values are an associative array, exactly
  *
  * @return mixed
  */
-public function insert(string $table, array $values)
+public function insert(string $table, array $values): mixed;
 ```
 
 
@@ -91,7 +91,7 @@ Delete existing rows from the database. The where statement is identical to the 
  * @return mixed
  * @throws \DavaHome\Database\DatabaseException
  */
-public function delete(string $table, array $where, bool $allowEmptyWhere = false)
+public function delete(string $table, array $where, bool $allowEmptyWhere = false): mixed;
 ```
 
 
@@ -142,7 +142,7 @@ This method creates a uuid which can be used as non-incremental unique index. Se
  *
  * @return string
  */
-public function createUuid(): string
+public function createUuid(): string;
 ```
 
 
@@ -160,7 +160,7 @@ Creates a prepared statement which will be executed directly
  *
  * @return mixed|\PDOStatement
  */
-public function execute($statement, array $inputParameters = [], array $driverOptions = []):PDOStatement
+public function execute($statement, array $inputParameters = [], array $driverOptions = []): PDOStatement;
 ```
 
 
@@ -176,7 +176,7 @@ Set the isolation level of transactions in the current connection
  *
  * @return bool
  */
-public function setIsolationLevel(string $isolationLevel): bool
+public function setIsolationLevel(string $isolationLevel): bool;
 ```
  
 
