@@ -36,14 +36,14 @@ class Mysql extends Pdo implements AdapterInterface
         return md5(json_encode([$statement, $driverOptions]));
     }
 
-    public function prepare($statement, $driver_options = [])
+    public function prepare(string $query, array $options = []): false|PDOStatement
     {
-        $hash = $this->calculateStatementHash($statement, $driver_options);
+        $hash = $this->calculateStatementHash($query, $options);
         if (isset($this->stmtCache[$hash])) {
             return $this->stmtCache[$hash];
         }
 
-        return $this->stmtCache[$hash] = parent::prepare($statement, $driver_options);
+        return $this->stmtCache[$hash] = parent::prepare($query, $options);
     }
 
     /**

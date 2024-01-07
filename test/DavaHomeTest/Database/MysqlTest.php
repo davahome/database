@@ -1,4 +1,5 @@
 <?php
+/** @noinspection ALL */
 declare(strict_types=1);
 
 namespace DavaHomeTest\Database;
@@ -7,103 +8,91 @@ use DavaHome\Database\Adapter\Mysql;
 use DavaHome\Database\Extension\CustomOperator;
 use DavaHome\Database\Extension\DirectValue;
 use Exception;
+use Mockery;
 use PDOStatement;
-use PHPUnit_Framework_TestCase;
 
-class MysqlTest extends PHPUnit_Framework_TestCase
+function createExecuteMock(int $count = 1): Mysql
 {
-    protected function getMysqlMock_Execute(int $count = 1): Mysql
-    {
-        $mysqlMock = $this->getMockBuilder(Mysql::class)
-            ->setMethods(['execute'])
-            ->disableOriginalConstructor()
-            ->getMock();
+    $mysqlMock = Mockery::mock(Mysql::class)
+        ->makePartial()
+        ->allows(['execute']);
 
-        $mysqlMock->expects($this->exactly($count))
-            ->method('execute')
-            ->willReturnCallback(function ($statement, $inputParameters) {
-                return new class($statement, $inputParameters) extends PDOStatement {
-                    private string $query;
-                    private array $inputParameters;
+    $mysqlMock->expects('execute')->times($count)->andReturnUsing(function ($statement, $inputParameters) {
+        return new class($statement, $inputParameters) extends PDOStatement {
+            private string $query;
+            private array $inputParameters;
 
-                    public function __construct(string $query, array $inputParameters)
-                    {
-                        $this->query = $query;
-                        $this->inputParameters = $inputParameters;
-                    }
+            public function __construct(string $query, array $inputParameters)
+            {
+                $this->query = $query;
+                $this->inputParameters = $inputParameters;
+            }
 
+            public function getMockQuery(): string
+            {
+                return $this->query;
+            }
 
-                    public function getMockQuery(): string
-                    {
-                        return $this->query;
-                    }
+            public function getMockParameters(): array
+            {
+                return $this->inputParameters;
+            }
+        };
+    });
 
-                    public function getMockParameters(): array
-                    {
-                        return $this->inputParameters;
-                    }
-                };
-            });
-
-        return $mysqlMock;
-    }
-
-    public function testUpdate_WithEmptyWhere(): void
-    {
-        $this->setExpectedExceptionRegExp(Exception::class, '/empty where/i');
-        $this->getMysqlMock_Execute(0)->update('', [], []);
-    }
-
-    public function testUpdate(): void
-    {
-        $mysql = $this->getMysqlMock_Execute();
-
-        $result = $mysql->update('foobar', ['foo' => 'bar'], ['foo' => 'baz']);
-        $this->assertArrayHasKey('value_0', $result->getMockParameters());
-        $this->assertArrayHasKey('where_1', $result->getMockParameters());
-        $this->assertEquals('UPDATE `foobar` SET `foo` = :value_0 WHERE `foo` = :where_1', $result->getMockQuery());
-        $this->assertEquals('bar', $result->getMockParameters()['value_0']);
-        $this->assertEquals('baz', $result->getMockParameters()['where_1']);
-    }
-
-    public function testInsert(): void
-    {
-        $mysql = $this->getMysqlMock_Execute();
-
-        $result = $mysql->insert('foobar', ['foo' => 'bar']);
-        $this->assertArrayHasKey('value_0', $result->getMockParameters());
-        $this->assertEquals('INSERT INTO `foobar` SET `foo` = :value_0', $result->getMockQuery());
-        $this->assertEquals('bar', $result->getMockParameters()['value_0']);
-    }
-
-    public function testUpdate_WithDirectValue(): void
-    {
-        $mysql = $this->getMysqlMock_Execute();
-
-        $result = $mysql->update('foobar', ['foo' => new DirectValue('BAR()')], ['foo' => new DirectValue('BAZ()')]);
-        $this->assertEmpty($result->getMockParameters());
-        $this->assertEquals(sprintf('UPDATE `foobar` SET `foo` = %s WHERE `foo` = %s', 'BAR()', 'BAZ()'), $result->getMockQuery());
-    }
-
-    public function testUpdate_WithCustomOperator(): void
-    {
-        $mysql = $this->getMysqlMock_Execute();
-
-        $result = $mysql->update('foobar', ['foo' => 'bar'], ['foo' => new CustomOperator('!=', 'baz')]);
-        $this->assertArrayHasKey('value_0', $result->getMockParameters());
-        $this->assertArrayHasKey('where_1', $result->getMockParameters());
-        $this->assertEquals('UPDATE `foobar` SET `foo` = :value_0 WHERE `foo` != :where_1', $result->getMockQuery());
-        $this->assertEquals('bar', $result->getMockParameters()['value_0']);
-        $this->assertEquals('baz', $result->getMockParameters()['where_1']);
-    }
-
-    public function testUpdate_WithCustomOperatorAndDirectValue(): void
-    {
-        $mysql = $this->getMysqlMock_Execute();
-
-        $result = $mysql->update('foobar', ['foo' => 'bar'], ['foo' => new CustomOperator('!=', new DirectValue('BAZ()'))]);
-        $this->assertArrayHasKey('value_0', $result->getMockParameters());
-        $this->assertEquals(sprintf('UPDATE `foobar` SET `foo` = :value_0 WHERE `foo` != %s', 'BAZ()'), $result->getMockQuery());
-        $this->assertEquals('bar', $result->getMockParameters()['value_0']);
-    }
+    return $mysqlMock;
 }
+
+test('update with empty where', function () {
+    $this->expectException(Exception::class);
+    createExecuteMock(0)->update('', [], []);
+
+})->throws(Exception::class, 'Empty where statements are not allowed!');
+
+test('update', function () {
+    $mysql = createExecuteMock();
+
+    $result = $mysql->update('foobar', ['foo' => 'bar'], ['foo' => 'baz']);
+    expect($result->getMockParameters())->toHaveKey('value_0');
+    expect($result->getMockParameters())->toHaveKey('where_1');
+    expect($result->getMockQuery())->toBe('UPDATE `foobar` SET `foo` = :value_0 WHERE `foo` = :where_1');
+    expect($result->getMockParameters()['value_0'])->toBe('bar');
+    expect($result->getMockParameters()['where_1'])->toBe('baz');
+});
+
+test('update with direct value', function () {
+    $mysql = createExecuteMock();
+
+    $result = $mysql->update('foobar', ['foo' => new DirectValue('BAR()')], ['foo' => new DirectValue('BAZ()')]);
+    expect($result->getMockParameters())->toBeEmpty();
+    expect($result->getMockQuery())->toBe(sprintf('UPDATE `foobar` SET `foo` = %s WHERE `foo` = %s', 'BAR()', 'BAZ()'));
+});
+
+test('update with custom operator', function () {
+    $mysql = createExecuteMock();
+
+    $result = $mysql->update('foobar', ['foo' => 'bar'], ['foo' => new CustomOperator('!=', 'baz')]);
+    expect($result->getMockParameters())->toHaveKey('value_0');
+    expect($result->getMockParameters())->toHaveKey('where_1');
+    expect($result->getMockQuery())->toBe('UPDATE `foobar` SET `foo` = :value_0 WHERE `foo` != :where_1');
+    expect($result->getMockParameters()['value_0'])->toBe('bar');
+    expect($result->getMockParameters()['where_1'])->toBe('baz');
+});
+
+test('update with custom operator and direct value', function () {
+    $mysql = createExecuteMock();
+
+    $result = $mysql->update('foobar', ['foo' => 'bar'], ['foo' => new CustomOperator('!=', new DirectValue('BAZ()'))]);
+    expect($result->getMockParameters())->toHaveKey('value_0');
+    expect($result->getMockQuery())->toBe(sprintf('UPDATE `foobar` SET `foo` = :value_0 WHERE `foo` != %s', 'BAZ()'));
+    expect($result->getMockParameters()['value_0'])->toBe('bar');
+});
+
+test('insert', function () {
+    $mysql = createExecuteMock();
+
+    $result = $mysql->insert('foobar', ['foo' => 'bar']);
+    expect($result->getMockParameters())->toHaveKey('value_0');
+    expect($result->getMockQuery())->toBe('INSERT INTO `foobar` SET `foo` = :value_0');
+    expect($result->getMockParameters()['value_0'])->toBe('bar');
+});
