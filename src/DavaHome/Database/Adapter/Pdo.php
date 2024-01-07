@@ -8,7 +8,7 @@ class Pdo extends \PDO
     public const DRIVER_MYSQL = 'mysql';
     public const DRIVER_SQLITE = 'sqlite';
 
-    public static function create(string $driver, string $host, string $user, string $password, string $database, array $options = [])
+    public static function create(string $driver, string $host, string $user, string $password, string $database, array $options = []): static
     {
         $dsn = sprintf('%s:dbname=%s;host=%s', $driver, $database, $host);
 

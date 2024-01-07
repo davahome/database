@@ -18,7 +18,7 @@ class Mysql extends Pdo implements AdapterInterface
     /** @var array<PDOStatement> */
     protected array $stmtCache = [];
 
-    public static function create(string $driver, string $host, string $user, string $password, string $database, array $options = []): self
+    public static function create(string $driver, string $host, string $user, string $password, string $database, array $options = []): static
     {
         $db = parent::create($driver, $host, $user, $password, $database, $options);
         $db->exec('SET NAMES "utf8mb4"');

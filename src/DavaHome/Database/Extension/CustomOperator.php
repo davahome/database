@@ -8,13 +8,13 @@ class CustomOperator
     protected string $operator = '=';
 
     /** @var mixed|DirectValue */
-    protected $value;
+    protected mixed $value;
 
     /**
      * @param string            $operator
      * @param DirectValue|mixed $value
      */
-    public function __construct(string $operator, $value)
+    public function __construct(string $operator, mixed $value)
     {
         $this->operator = $operator;
         $this->value = $value;
@@ -35,7 +35,7 @@ class CustomOperator
     /**
      * @return DirectValue|mixed
      */
-    public function getValue()
+    public function getValue(): mixed
     {
         return $this->value;
     }
@@ -45,7 +45,7 @@ class CustomOperator
      *
      * @return $this
      */
-    public function setValue($value): self
+    public function setValue(mixed $value): self
     {
         $this->value = $value;
 

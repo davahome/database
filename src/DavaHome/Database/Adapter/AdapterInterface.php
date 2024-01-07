@@ -18,7 +18,7 @@ interface AdapterInterface
      * @return mixed
      * @throws Exception
      */
-    public function update(string $table, array $values, array $where, bool $allowEmptyWhere = false);
+    public function update(string $table, array $values, array $where, bool $allowEmptyWhere = false): mixed;
 
     /**
      * Insert a new row
@@ -28,7 +28,7 @@ interface AdapterInterface
      *
      * @return mixed
      */
-    public function insert(string $table, array $values);
+    public function insert(string $table, array $values): mixed;
 
     /**
      * Select from database
@@ -38,7 +38,7 @@ interface AdapterInterface
      *
      * @return mixed
      */
-    public function select(string $table, array $where);
+    public function select(string $table, array $where): mixed;
 
     /**
      * Delete a from database
@@ -50,5 +50,5 @@ interface AdapterInterface
      * @return mixed
      * @throws Exception
      */
-    public function delete(string $table, array $where, bool $allowEmptyWhere = false);
+    public function delete(string $table, array $where, bool $allowEmptyWhere = false): mixed;
 }
